@@ -1,15 +1,33 @@
-import React from 'react';
-import { useState } from "react";
+import React from 'react'
+import { useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 
-function add() {
+function edit() {
     const history = useHistory();
+    const { rowIndex } = useParams();
     const [data, setData] = useState({
       name: "",
       email: "",
       message: "",
       date: new Date().toString(),
     });
+  
+    const getData = async () => {
+      try {
+        const res = await fetch(
+          `https://sheet.best/api/sheets/bff990d0-8ada-43e9-97eb-0ad668bb19ec/${rowIndex}`
+        );
+        const data = await res.json();
+        setData(data[0]);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+  
+    useEffect(() => {
+      getData();
+    }, []);
   
     const handleChange = (e) =>
       setData({ ...data, [e.target.name]: e.target.value });
@@ -18,9 +36,9 @@ function add() {
       e.preventDefault();
       try {
         const res = await fetch(
-          "https://sheet.best/api/sheets/bff990d0-8ada-43e9-97eb-0ad668bb19ec",
+          `https://sheet.best/api/sheets/bff990d0-8ada-43e9-97eb-0ad668bb19ec/${rowIndex}`,
           {
-            method: "POST",
+            method: "PUT",
             headers: {
               "Content-Type": "application/json",
             },
@@ -34,9 +52,10 @@ function add() {
         console.log(error);
       }
     };
+  
     return (
       <form style={{ maxWidth: 500, margin: "auto" }} onSubmit={handleSubmit}>
-        <h1 className="text-muted text-center">Add</h1>
+        <h1 className="text-muted text-center">Edit</h1>
         <div className="mb-3">
           <label htmlFor="name" className="form-label">
             Name
@@ -75,10 +94,10 @@ function add() {
           />
         </div>
         <div className="text-center">
-          <button className="btn btn-primary">Add</button>
+          <button className="btn btn-primary">Update</button>
         </div>
       </form>
     );
 }
 
-export default add
+export default edit
